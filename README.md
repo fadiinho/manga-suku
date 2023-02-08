@@ -6,6 +6,12 @@ A [Mangaybu](https://mangayabu.top) api to search and get mangas urls
 
 ## Running
 
+```bash
+git clone https://github.com/fadiinho/manga-suku.git
+cd manga-suku
+cargo run
+```
+
 ### License
 
 Under GPL-3 license
