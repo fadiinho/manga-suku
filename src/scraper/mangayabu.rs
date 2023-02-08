@@ -66,6 +66,16 @@ impl MangayabuScraper {
         Self { base_url, options }
     }
 
+    async fn get<T>(&self, url: String) -> T
+    where
+        T: for<'a> Deserialize<'a>,
+    {
+        let response = reqwest::get(url).await.unwrap();
+        let json_response: T = response.json().await.unwrap();
+
+        json_response
+    }
+
     fn build_url(&self, path: String) -> String {
         let url = format!("{}/{}{}", self.base_url, path, self.options.into_params());
 
@@ -75,10 +85,9 @@ impl MangayabuScraper {
     pub async fn search(&self, search: &str) -> Vec<Manga> {
         let url = &self.build_url(format!("wp-json/wp/v2/posts?search={}", search));
 
-        let response = reqwest::get(url).await.unwrap();
-        let json_response: Vec<Manga> = response.json().await.unwrap();
+        let response = self.get(url.to_owned()).await;
 
-        json_response
+        response
     }
 
     pub fn set_options(mut self, params: RequestParams) -> Self {
@@ -89,9 +98,8 @@ impl MangayabuScraper {
     pub async fn get_manga_by_id(&self, id: usize) -> Manga {
         let url = &self.build_url(format!("wp-json/wp/v2/posts/{}?", id));
 
-        let response = reqwest::get(url).await.unwrap();
-        let json_response: Manga = response.json().await.unwrap();
+        let response = self.get(url.to_owned()).await;
 
-        json_response
+        response
     }
 }
