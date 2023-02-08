@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use reqwest;
+use rocket::serde::Deserialize;
 
 use crate::models::manga::Manga;
 
@@ -73,6 +74,7 @@ impl MangayabuScraper {
 
     pub async fn search(&self, search: &str) -> Vec<Manga> {
         let url = &self.build_url(format!("wp-json/wp/v2/posts?search={}", search));
+
         let response = reqwest::get(url).await.unwrap();
         let json_response: Vec<Manga> = response.json().await.unwrap();
 
@@ -82,5 +84,14 @@ impl MangayabuScraper {
     pub fn set_options(mut self, params: RequestParams) -> Self {
         self.options = params;
         return self;
+    }
+
+    pub async fn get_manga_by_id(&self, id: usize) -> Manga {
+        let url = &self.build_url(format!("wp-json/wp/v2/posts/{}?", id));
+
+        let response = reqwest::get(url).await.unwrap();
+        let json_response: Manga = response.json().await.unwrap();
+
+        json_response
     }
 }
