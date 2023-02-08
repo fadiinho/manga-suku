@@ -7,10 +7,16 @@ use crate::models::manga::Manga;
 const BASE_URL: &'static str = "https://mangayabu.top";
 
 #[allow(dead_code)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, FromFormField)]
 pub enum Order {
     Asc,
     Desc,
+}
+
+impl Default for Order {
+    fn default() -> Self {
+        Order::Asc
+    }
 }
 
 impl Display for Order {
@@ -24,7 +30,7 @@ impl Display for Order {
 
 #[derive(Clone, Copy)]
 pub struct RequestParams {
-    pub per_page: u32,
+    pub per_page: usize,
     pub order: Order,
 }
 
@@ -45,7 +51,7 @@ impl Default for RequestParams {
 
 pub struct MangayabuScraper {
     pub base_url: &'static str,
-    pub options: RequestParams,
+    options: RequestParams,
 }
 
 impl Default for MangayabuScraper {
@@ -71,5 +77,10 @@ impl MangayabuScraper {
         let json_response: Vec<Manga> = response.json().await.unwrap();
 
         json_response
+    }
+
+    pub fn set_options(mut self, params: RequestParams) -> Self {
+        self.options = params;
+        return self;
     }
 }
