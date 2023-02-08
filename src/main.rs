@@ -14,6 +14,10 @@ fn index() -> &'static str {
 fn rocket() -> _ {
     rocket::build().mount("/", routes![index]).mount(
         "/manga",
-        routes![routes::manga::search, routes::manga::by_id],
+        routes![
+            routes::manga::search,
+            routes::manga::manga_by_id,
+            routes::manga::images_by_id
+        ],
     )
 }

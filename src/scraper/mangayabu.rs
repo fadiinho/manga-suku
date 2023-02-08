@@ -1,9 +1,11 @@
 use std::fmt::Display;
 
+use scraper::{Html, Selector};
+
 use reqwest;
 use rocket::serde::Deserialize;
 
-use crate::models::manga::Manga;
+use crate::models::manga::{Manga, MangaImage};
 
 const BASE_URL: &'static str = "https://mangayabu.top";
 
@@ -99,6 +101,41 @@ impl MangayabuScraper {
         let url = &self.build_url(format!("wp-json/wp/v2/posts/{}?", id));
 
         let response = self.get(url.to_owned()).await;
+
+        response
+    }
+
+    pub async fn get_images_by_url(&self, url: String) -> Vec<MangaImage> {
+        let response = reqwest::get(url).await.unwrap();
+        let html = response.text().await.unwrap();
+
+        let document = Html::parse_document(&html);
+
+        let images_div_selector = Selector::parse("div.manga-content img").unwrap();
+        let images_div = document.select(&images_div_selector);
+
+        let mut images: Vec<MangaImage> = Vec::new();
+
+        for image in images_div {
+            let title: String = image.value().attr("title").unwrap().into();
+
+            let raw_src = image.value().attr("src").unwrap();
+            let index = raw_src.find("https://").unwrap();
+            let src: String = raw_src.chars().skip(index).collect();
+
+            images.push(MangaImage {
+                page_title: title,
+                src,
+            });
+        }
+
+        images
+    }
+
+    pub async fn get_images_by_id(&self, id: usize) -> Vec<MangaImage> {
+        let manga = self.get_manga_by_id(id).await;
+
+        let response = self.get_images_by_url(manga.link).await;
 
         response
     }

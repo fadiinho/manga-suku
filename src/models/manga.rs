@@ -33,6 +33,13 @@ pub struct Manga {
     pub links: Links,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct MangaImage {
+    pub page_title: String,
+    pub src: String,
+}
+
 fn from_title<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
     D: Deserializer<'de>,
