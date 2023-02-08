@@ -4,6 +4,8 @@
 
 A [Mangaybu](https://mangayabu.top) api to search and get mangas urls
 
+## Running
+
 ### License
 
 Under GPL-3 license
