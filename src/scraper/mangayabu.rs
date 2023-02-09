@@ -1,35 +1,11 @@
-use std::fmt::Display;
-
 use scraper::{Html, Selector};
 
 use reqwest;
 use rocket::serde::Deserialize;
 
-use crate::models::manga::{Manga, MangaImage};
+use crate::models::manga::{Manga, MangaImage, Order};
 
 const BASE_URL: &'static str = "https://mangayabu.top";
-
-#[allow(dead_code)]
-#[derive(Clone, Copy, FromFormField)]
-pub enum Order {
-    Asc,
-    Desc,
-}
-
-impl Default for Order {
-    fn default() -> Self {
-        Order::Asc
-    }
-}
-
-impl Display for Order {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Order::Asc => write!(f, "asc"),
-            Order::Desc => write!(f, "desc"),
-        }
-    }
-}
 
 #[derive(Clone, Copy)]
 pub struct RequestParams {

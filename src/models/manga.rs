@@ -1,4 +1,7 @@
+use rocket::http::impl_from_uri_param_identity;
+use rocket::http::uri::fmt::{Query, UriDisplay};
 use rocket::serde::{Deserialize, Deserializer, Serialize};
+use std::fmt::Display;
 
 // Probably temporary
 #[derive(Serialize, Deserialize, Debug)]
@@ -57,3 +60,36 @@ where
 
     Ok(s.first().unwrap().href.to_owned())
 }
+
+#[derive(Copy, Clone, FromFormField)]
+#[allow(dead_code)]
+pub enum Order {
+    Asc,
+    Desc,
+}
+
+impl Default for Order {
+    fn default() -> Self {
+        Order::Asc
+    }
+}
+
+impl Display for Order {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Order::Asc => write!(f, "asc"),
+            Order::Desc => write!(f, "desc"),
+        }
+    }
+}
+
+impl UriDisplay<Query> for Order {
+    fn fmt(&self, f: &mut rocket::http::uri::fmt::Formatter<'_, Query>) -> std::fmt::Result {
+        match self {
+            Order::Asc => f.write_named_value("order", "asc"),
+            Order::Desc => f.write_named_value("order", "desc"),
+        }
+    }
+}
+
+impl_from_uri_param_identity!([Query] Order);

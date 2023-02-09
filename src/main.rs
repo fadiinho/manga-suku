@@ -6,13 +6,13 @@ mod scraper;
 extern crate rocket;
 
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+fn hello() -> &'static str {
+    "It works!"
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index]).mount(
+    rocket::build().mount("/", routes![hello]).mount(
         "/manga",
         routes![
             routes::manga::search,

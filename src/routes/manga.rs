@@ -1,5 +1,5 @@
-use crate::models::manga::{Manga, MangaImage};
-use crate::scraper::mangayabu::{MangayabuScraper, Order, RequestParams};
+use crate::models::manga::{Manga, MangaImage, Order};
+use crate::scraper::mangayabu::{MangayabuScraper, RequestParams};
 
 use rocket::serde::json::Json;
 
