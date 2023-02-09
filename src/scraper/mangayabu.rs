@@ -44,14 +44,19 @@ impl MangayabuScraper {
         Self { base_url, options }
     }
 
-    async fn get<T>(&self, url: String) -> T
+    async fn get<T>(&self, url: String) -> Result<T, &str>
     where
         T: for<'a> Deserialize<'a>,
     {
         let response = reqwest::get(url).await.unwrap();
+
+        if !response.status().is_success() {
+            return Err("Manga not found!");
+        }
+
         let json_response: T = response.json().await.unwrap();
 
-        json_response
+        Ok(json_response)
     }
 
     fn build_url(&self, path: String) -> String {
@@ -60,12 +65,16 @@ impl MangayabuScraper {
         url
     }
 
-    pub async fn search(&self, search: &str) -> Vec<Manga> {
+    pub async fn search(&self, search: &str) -> Result<Vec<Manga>, &str> {
         let url = &self.build_url(format!("wp-json/wp/v2/posts?search={}", search));
 
-        let response = self.get(url.to_owned()).await;
+        let response: Vec<Manga> = self.get(url.to_owned()).await.unwrap();
 
-        response
+        if response.is_empty() {
+            return Err("Manga not Found!");
+        }
+
+        Ok(response)
     }
 
     pub fn set_options(mut self, params: RequestParams) -> Self {
@@ -73,12 +82,16 @@ impl MangayabuScraper {
         return self;
     }
 
-    pub async fn get_manga_by_id(&self, id: usize) -> Manga {
+    pub async fn get_manga_by_id(&self, id: usize) -> Result<Manga, &str> {
         let url = &self.build_url(format!("wp-json/wp/v2/posts/{}?", id));
 
-        let response = self.get(url.to_owned()).await;
+        let response: Result<Manga, _> = self.get(url.to_owned()).await;
 
-        response
+        if response.is_err() {
+            return Err("Manga not Found!");
+        }
+
+        Ok(response.unwrap())
     }
 
     pub async fn get_images_by_url(&self, url: String) -> Vec<MangaImage> {
@@ -108,11 +121,19 @@ impl MangayabuScraper {
         images
     }
 
-    pub async fn get_images_by_id(&self, id: usize) -> Vec<MangaImage> {
-        let manga = self.get_manga_by_id(id).await;
+    pub async fn get_images_by_id(&self, id: usize) -> Result<Vec<MangaImage>, &str> {
+        let manga: Result<_, _> = self.get_manga_by_id(id).await;
 
-        let response = self.get_images_by_url(manga.link).await;
+        if manga.is_err() {
+            return Err("Images not found!");
+        }
 
-        response
+        let response = self.get_images_by_url(manga.unwrap().link).await;
+
+        if response.is_empty() {
+            return Err("Images not found!");
+        }
+
+        Ok(response)
     }
 }
