@@ -68,13 +68,19 @@ impl MangayabuScraper {
     pub async fn search(&self, search: &str) -> Result<Vec<Manga>, &str> {
         let url = &self.build_url(format!("wp-json/wp/v2/posts?search={}", search));
 
-        let response: Vec<Manga> = self.get(url.to_owned()).await.unwrap();
+        let response: Result<Vec<Manga>, _> = self.get(url.to_owned()).await;
 
-        if response.is_empty() {
+        if response.is_err() {
             return Err("Manga not Found!");
         }
 
-        Ok(response)
+        let mangas = response.unwrap();
+
+        if mangas.is_empty() {
+            return Err("Manga not Found!");
+        }
+
+        Ok(mangas)
     }
 
     pub fn set_options(mut self, params: RequestParams) -> Self {
