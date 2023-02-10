@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 
-use reqwest;
+use reqwest::Client;
 use rocket::serde::Deserialize;
 
 use crate::models::manga::{Manga, MangaImage, Order};
@@ -31,6 +31,7 @@ impl Default for RequestParams {
 pub struct MangayabuScraper {
     pub base_url: &'static str,
     options: RequestParams,
+    client: Client,
 }
 
 impl Default for MangayabuScraper {
@@ -41,14 +42,20 @@ impl Default for MangayabuScraper {
 
 impl MangayabuScraper {
     pub fn new(base_url: &'static str, options: RequestParams) -> Self {
-        Self { base_url, options }
+        Self {
+            base_url,
+            options,
+            client: Client::new(),
+        }
     }
 
     async fn get<T>(&self, url: String) -> Result<T, &str>
     where
         T: for<'a> Deserialize<'a>,
     {
-        let response = reqwest::get(url).await.unwrap();
+        let response = self.client.get(url)
+            .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+            .send().await.unwrap();
 
         if !response.status().is_success() {
             return Err("Manga not found!");
@@ -101,7 +108,10 @@ impl MangayabuScraper {
     }
 
     pub async fn get_images_by_url(&self, url: String) -> Vec<MangaImage> {
-        let response = reqwest::get(url).await.unwrap();
+        let response = self.client.get(url)
+            .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+            .send().await.unwrap();
+
         let html = response.text().await.unwrap();
 
         let document = Html::parse_document(&html);
