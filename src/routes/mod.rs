@@ -1,1 +1,1 @@
-pub mod manga;
+pub mod mangayabu;

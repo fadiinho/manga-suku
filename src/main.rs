@@ -13,11 +13,11 @@ fn hello() -> &'static str {
 #[launch]
 fn rocket() -> _ {
     rocket::build().mount("/", routes![hello]).mount(
-        "/manga",
+        "/mangayabu",
         routes![
-            routes::manga::search,
-            routes::manga::manga_by_id,
-            routes::manga::images_by_id
+            routes::mangayabu::search,
+            routes::mangayabu::manga_by_id,
+            routes::mangayabu::images_by_id
         ],
     )
 }
@@ -45,7 +45,11 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::search("the beginning after the end", Some(1), Some(Order::Asc))
+            super::routes::mangayabu::search(
+                "the beginning after the end",
+                Some(1),
+                Some(Order::Asc)
+            )
         );
 
         let response = client.get(uri).dispatch();
@@ -61,7 +65,7 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::search(
+            super::routes::mangayabu::search(
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 Some(1),
                 Some(Order::Asc)
@@ -81,7 +85,7 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::manga_by_id(118967, Some(1), Some(Order::Asc))
+            super::routes::mangayabu::manga_by_id(118967, Some(1), Some(Order::Asc))
         );
 
         let response = client.get(uri).dispatch();
@@ -97,7 +101,7 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::manga_by_id(1, Some(1), Some(Order::Asc))
+            super::routes::mangayabu::manga_by_id(1, Some(1), Some(Order::Asc))
         );
 
         let response = client.get(uri).dispatch();
@@ -113,7 +117,7 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::images_by_id(118967, Some(1), Some(Order::Asc))
+            super::routes::mangayabu::images_by_id(118967, Some(1), Some(Order::Asc))
         );
 
         let response = client.get(uri).dispatch();
@@ -129,7 +133,7 @@ mod api_tests {
 
         let uri = uri!(
             "/manga",
-            super::routes::manga::images_by_id(1, Some(1), Some(Order::Asc))
+            super::routes::mangayabu::images_by_id(1, Some(1), Some(Order::Asc))
         );
 
         let response = client.get(uri).dispatch();
