@@ -53,8 +53,15 @@ impl MangayabuScraper {
     where
         T: for<'a> Deserialize<'a>,
     {
-        let response = self.client.get(url)
+        let response = self.client.get(&url)
             .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+            .header("Referer", &url)
+            .header("sec-ch-ua", "'Not?A_Brand';v='8', 'Chromium';v='108'")
+            .header("sec-ch-ua-mobile", "?0")
+            .header("sec-ch-ua-platform", "Linux")
+            .header("sec-fetch-dest", "empty")
+            .header("sec-fetch-mode", "cors")
+            .header("sec-fetch-site", "same-origin")
             .send().await.unwrap();
 
         if !response.status().is_success() {
@@ -108,8 +115,15 @@ impl MangayabuScraper {
     }
 
     pub async fn get_images_by_url(&self, url: String) -> Vec<MangaImage> {
-        let response = self.client.get(url)
+        let response = self.client.get(&url)
             .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+            .header("Referer", &url)
+            .header("sec-ch-ua", "'Not?A_Brand';v='8', 'Chromium';v='108'")
+            .header("sec-ch-ua-mobile", "?0")
+            .header("sec-ch-ua-platform", "Linux")
+            .header("sec-fetch-dest", "empty")
+            .header("sec-fetch-mode", "cors")
+            .header("sec-fetch-site", "same-origin")
             .send().await.unwrap();
 
         let html = response.text().await.unwrap();
