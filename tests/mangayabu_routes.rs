@@ -4,14 +4,24 @@ extern crate rocket;
 #[cfg(test)]
 mod mangayabu_tests {
     use manga_suku::models::manga::Order;
-    use manga_suku::rocket;
-    use manga_suku::routes;
+    use manga_suku::{hello, routes};
     use rocket::http::Status;
     use rocket::local::blocking::Client;
 
+    pub fn ignite() -> rocket::Rocket<rocket::Build> {
+        rocket::build().mount("/", routes![hello]).mount(
+            "/mangayabu",
+            routes![
+                routes::mangayabu::search,
+                routes::mangayabu::manga_by_id,
+                routes::mangayabu::images_by_id
+            ],
+        )
+    }
+
     #[test]
     fn it_works() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
         let response = client.get(uri!(manga_suku::hello)).dispatch();
 
         assert_eq!(response.status(), Status::Ok);
@@ -20,7 +30,7 @@ mod mangayabu_tests {
 
     #[test]
     fn search_manga() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
@@ -34,7 +44,7 @@ mod mangayabu_tests {
 
     #[test]
     fn search_nonexistent_manga() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
@@ -52,7 +62,7 @@ mod mangayabu_tests {
 
     #[test]
     fn get_manga_by_id() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
@@ -66,7 +76,7 @@ mod mangayabu_tests {
 
     #[test]
     fn get_nonexistent_manga_by_id() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
@@ -80,7 +90,7 @@ mod mangayabu_tests {
 
     #[test]
     fn get_images_by_manga_id() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
@@ -94,7 +104,7 @@ mod mangayabu_tests {
 
     #[test]
     fn get_nonexistent_images_by_manga_id() {
-        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let client = Client::tracked(ignite()).expect("valid rocket instance");
 
         let uri = uri!(
             "/mangayabu",
