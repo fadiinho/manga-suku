@@ -1,4 +1,4 @@
-use crate::scraper::goldenmanga::{GoldenmangaMangaSearch, GoldenmangaScraper};
+use crate::scraper::goldenmanga::{GoldenmangaManga, GoldenmangaMangaSearch, GoldenmangaScraper};
 
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
@@ -8,6 +8,19 @@ pub async fn search(search: &str) -> Result<Json<Vec<GoldenmangaMangaSearch>>, N
     let manga_scraper = GoldenmangaScraper::default();
 
     let result = manga_scraper.search(search).await;
+
+    if result.is_err() {
+        return Err(NotFound(result.unwrap_err().to_string()));
+    }
+
+    Ok(Json(result.unwrap()))
+}
+
+#[get("/<manga_path>")]
+pub async fn get_manga(manga_path: &str) -> Result<Json<GoldenmangaManga>, NotFound<String>> {
+    let manga_scraper = GoldenmangaScraper::default();
+
+    let result = manga_scraper.get_manga_by_path(manga_path).await;
 
     if result.is_err() {
         return Err(NotFound(result.unwrap_err().to_string()));

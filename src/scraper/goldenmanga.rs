@@ -12,6 +12,21 @@ pub struct GoldenmangaMangaSearch {
     cover_image: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct GoldenmangaChapter {
+    link: String,
+    chapter: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct GoldenmangaManga {
+    name: String,
+    description: String,
+    chapters: Vec<GoldenmangaChapter>,
+}
+
 pub struct GoldenmangaScraper {
     pub base_url: &'static str,
     client: Client,
@@ -79,5 +94,51 @@ impl GoldenmangaScraper {
         }
 
         Ok(mangas)
+    }
+
+    pub async fn get_manga_by_path(&self, manga_path: &str) -> Result<GoldenmangaManga, &str> {
+        let url = format!("{}/mangabr/{}", BASE_URL, manga_path);
+        let response = self.client.get(url).send().await;
+
+        if response.is_err() {
+            return Err("Manga not found!");
+        }
+
+        Ok(self.get_manga_info(response.unwrap().text().await.unwrap())?)
+    }
+
+    fn get_manga_info(&self, text: String) -> Result<GoldenmangaManga, &str> {
+        let html = Html::parse_document(&text);
+
+        let title_selector = Selector::parse("div.row > div > h2").unwrap();
+        let description_selector =
+            Selector::parse("div.row > div >div#manga_capitulo_descricao span").unwrap();
+        let chapters_selector = Selector::parse("div.row > div > ul.capitulos li > a").unwrap();
+
+        let mut title = html.select(&title_selector);
+        let mut description = html.select(&description_selector);
+        let chapters_container = html.select(&chapters_selector);
+
+        let mut chapters: Vec<GoldenmangaChapter> = Vec::new();
+
+        for chapter in chapters_container {
+            chapters.push(GoldenmangaChapter {
+                link: format!("{}{}", BASE_URL, chapter.value().attr("href").unwrap()),
+                chapter: chapter
+                    .text()
+                    .collect::<String>()
+                    .trim()
+                    .to_owned()
+                    .split("\n")
+                    .take(1)
+                    .collect::<String>(),
+            });
+        }
+
+        Ok(GoldenmangaManga {
+            name: title.next().unwrap().text().collect::<String>(),
+            description: description.next().unwrap().text().collect::<String>(),
+            chapters,
+        })
     }
 }
