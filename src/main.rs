@@ -17,6 +17,10 @@ pub fn rocket() -> rocket::Rocket<rocket::Build> {
         )
         .mount(
             "/goldenmanga",
-            routes![routes::goldenmanga::search, routes::goldenmanga::get_manga],
+            routes![
+                routes::goldenmanga::search,
+                routes::goldenmanga::get_manga,
+                routes::goldenmanga::get_manga_images
+            ],
         )
 }

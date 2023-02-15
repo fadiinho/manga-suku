@@ -141,4 +141,41 @@ impl GoldenmangaScraper {
             chapters,
         })
     }
+
+    fn parse_manga_images(&self, text: String) -> Vec<String> {
+        let html = Html::parse_document(&text);
+
+        let pages_selector = Selector::parse("#capitulos_images img").unwrap();
+
+        let pages_element = html.select(&pages_selector);
+
+        let mut pages: Vec<String> = vec![];
+
+        for page in pages_element {
+            let src = page.value().attr("src");
+
+            if src.is_some() {
+                pages.push(format!("{}{}", BASE_URL, src.unwrap().to_owned()));
+            }
+        }
+
+        pages
+    }
+
+    pub async fn get_manga_images(
+        &self,
+        manga_path: &str,
+        chapter: &str,
+    ) -> Result<Vec<String>, &str> {
+        let url = format!("{}/mangabr/{}/{}", BASE_URL, manga_path, chapter);
+        let response = self.client.get(url).send().await;
+
+        if response.is_err() {
+            return Err("Manga not found!");
+        }
+
+        let result: Vec<String> = self.parse_manga_images(response.unwrap().text().await.unwrap());
+
+        Ok(result)
+    }
 }

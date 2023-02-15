@@ -28,3 +28,19 @@ pub async fn get_manga(manga_path: &str) -> Result<Json<GoldenmangaManga>, NotFo
 
     Ok(Json(result.unwrap()))
 }
+
+#[get("/images/<manga_path>?<chapter>")]
+pub async fn get_manga_images(
+    manga_path: &str,
+    chapter: &str,
+) -> Result<Json<Vec<String>>, NotFound<String>> {
+    let manga_scraper = GoldenmangaScraper::default();
+
+    let result = manga_scraper.get_manga_images(manga_path, chapter).await;
+
+    if result.is_err() {
+        return Err(NotFound(result.unwrap_err().to_string()));
+    }
+
+    Ok(Json(result.unwrap()))
+}
