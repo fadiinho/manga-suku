@@ -25,6 +25,7 @@ pub struct GoldenmangaManga {
     name: String,
     description: String,
     chapters: Vec<GoldenmangaChapter>,
+    path: String,
 }
 
 pub struct GoldenmangaScraper {
@@ -98,16 +99,16 @@ impl GoldenmangaScraper {
 
     pub async fn get_manga_by_path(&self, manga_path: &str) -> Result<GoldenmangaManga, &str> {
         let url = format!("{}/mangabr/{}", BASE_URL, manga_path);
-        let response = self.client.get(url).send().await;
+        let response = self.client.get(&url).send().await;
 
         if response.is_err() {
             return Err("Manga not found!");
         }
 
-        Ok(self.get_manga_info(response.unwrap().text().await.unwrap())?)
+        Ok(self.get_manga_info(response.unwrap().text().await.unwrap(), url)?)
     }
 
-    fn get_manga_info(&self, text: String) -> Result<GoldenmangaManga, &str> {
+    fn get_manga_info(&self, text: String, url: String) -> Result<GoldenmangaManga, &str> {
         let html = Html::parse_document(&text);
 
         let title_selector = Selector::parse("div.row > div > h2").unwrap();
@@ -138,6 +139,7 @@ impl GoldenmangaScraper {
         Ok(GoldenmangaManga {
             name: title.next().unwrap().text().collect::<String>(),
             description: description.next().unwrap().text().collect::<String>(),
+            path: url.split('/').last().unwrap().to_owned(),
             chapters,
         })
     }
