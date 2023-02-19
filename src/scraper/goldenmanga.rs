@@ -26,6 +26,7 @@ pub struct GoldenmangaManga {
     description: String,
     chapters: Vec<GoldenmangaChapter>,
     path: String,
+    cover: String,
 }
 
 pub struct GoldenmangaScraper {
@@ -115,9 +116,12 @@ impl GoldenmangaScraper {
         let description_selector =
             Selector::parse("div.row > div >div#manga_capitulo_descricao span").unwrap();
         let chapters_selector = Selector::parse("div.row > div > ul.capitulos li > a").unwrap();
+        let cover_selector =
+            Selector::parse(".container.manga div.row .text-right > .img-responsive").unwrap();
 
         let mut title = html.select(&title_selector);
         let mut description = html.select(&description_selector);
+        let mut cover = html.select(&cover_selector);
         let chapters_container = html.select(&chapters_selector);
 
         let mut chapters: Vec<GoldenmangaChapter> = Vec::new();
@@ -140,6 +144,11 @@ impl GoldenmangaScraper {
             name: title.next().unwrap().text().collect::<String>(),
             description: description.next().unwrap().text().collect::<String>(),
             path: url.split('/').last().unwrap().to_owned(),
+            cover: format!(
+                "{}{}",
+                BASE_URL,
+                cover.next().unwrap().value().attr("src").unwrap()
+            ),
             chapters,
         })
     }
