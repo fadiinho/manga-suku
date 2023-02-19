@@ -36,9 +36,9 @@ pub fn hello() -> &'static str {
     "It works!"
 }
 
-#[shuttle_service::main]
-pub async fn rocket() -> shuttle_service::ShuttleRocket {
-    let rocket = rocket::build()
+#[launch]
+pub async fn rocket() -> rocket::Rocket<rocket::Build> {
+    rocket::build()
         .attach(CORS)
         .mount("/", routes![hello])
         .mount(
@@ -56,7 +56,5 @@ pub async fn rocket() -> shuttle_service::ShuttleRocket {
                 routes::goldenmanga::get_manga,
                 routes::goldenmanga::get_manga_images
             ],
-        );
-
-    Ok(rocket)
+        )
 }
