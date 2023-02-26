@@ -140,7 +140,10 @@ impl GoldenmangaScraper {
                     .to_owned()
                     .split("\n")
                     .take(1)
-                    .collect::<String>(),
+                    .collect::<String>()
+                    .replace("Cap ", "")
+                    .trim()
+                    .to_owned(),
             });
         }
 
