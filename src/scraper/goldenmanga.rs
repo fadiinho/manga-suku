@@ -27,6 +27,8 @@ pub struct GoldenmangaManga {
     chapters: Vec<GoldenmangaChapter>,
     path: String,
     cover: String,
+    #[serde(rename(serialize = "isNsfw", deserialize = "is_nsfw"))]
+    is_nsfw: bool,
 }
 
 pub struct GoldenmangaScraper {
@@ -114,14 +116,16 @@ impl GoldenmangaScraper {
 
         let title_selector = Selector::parse("div.row > div > h2").unwrap();
         let description_selector =
-            Selector::parse("div.row > div >div#manga_capitulo_descricao span").unwrap();
-        let chapters_selector = Selector::parse("div.row > div > ul.capitulos li > a").unwrap();
+            Selector::parse("div.row > div > div#manga_capitulo_descricao").unwrap();
+        let chapters_selector = Selector::parse("ul.capitulos li > a").unwrap();
         let cover_selector =
             Selector::parse(".container.manga div.row .text-right > .img-responsive").unwrap();
+        let nsfw_selector = Selector::parse("#capitulos_aviso").unwrap();
 
         let mut title = html.select(&title_selector);
         let mut description = html.select(&description_selector);
         let mut cover = html.select(&cover_selector);
+        let mut nsfw = html.select(&nsfw_selector);
         let chapters_container = html.select(&chapters_selector);
 
         let mut chapters: Vec<GoldenmangaChapter> = Vec::new();
@@ -150,6 +154,7 @@ impl GoldenmangaScraper {
                 cover.next().unwrap().value().attr("src").unwrap()
             ),
             chapters,
+            is_nsfw: nsfw.next().is_some(),
         })
     }
 
