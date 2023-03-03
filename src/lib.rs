@@ -57,4 +57,12 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
                 routes::goldenmanga::get_manga_images
             ],
         )
+        .mount(
+            "/mangalivre",
+            routes![
+                routes::mangalivre::search,
+                routes::mangalivre::get_chapters,
+                routes::mangalivre::get_pages
+            ],
+        )
 }
