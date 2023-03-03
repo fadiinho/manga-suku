@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use reqwest::{header::HeaderMap, Client};
+use reqwest::{header::HeaderMap, Client, Proxy};
 use rocket::serde::{Deserialize, Serialize};
 
 const BASE_URL: &'static str = "https://mangalivre.net";
@@ -86,15 +86,17 @@ impl Default for MangaLivreScraper {
             "application/x-www-form-urlencoded".parse().unwrap(),
         );
 
-        Self::new(BASE_URL, headers)
+        let proxy = Proxy::http("https://177.207.208.35:8080").unwrap();
+
+        Self::new(BASE_URL, headers, proxy)
     }
 }
 
 impl MangaLivreScraper {
-    pub fn new(base_url: &'static str, headers: HeaderMap) -> Self {
+    pub fn new(base_url: &'static str, headers: HeaderMap, proxy: Proxy) -> Self {
         MangaLivreScraper {
             base_url,
-            client: Client::new(),
+            client: Client::builder().proxy(proxy).build().unwrap(),
             headers,
         }
     }
