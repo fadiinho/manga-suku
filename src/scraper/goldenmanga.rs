@@ -9,6 +9,7 @@ const BASE_URL: &'static str = "https://goldenmangas.top";
 pub struct GoldenmangaMangaSearch {
     name: String,
     link: String,
+    path: String,
     cover_image: String,
 }
 
@@ -80,6 +81,7 @@ impl GoldenmangaScraper {
             mangas.push(GoldenmangaMangaSearch {
                 name,
                 link: format!("{}{}", BASE_URL, href),
+                path: href.split("/").last().unwrap().to_owned(),
                 cover_image: format!("{}{}", BASE_URL, cover_image),
             });
         }
