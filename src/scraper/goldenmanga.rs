@@ -12,7 +12,7 @@ pub struct GoldenmangaMangaSearch {
     cover_image: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct GoldenmangaChapter {
     link: String,
@@ -29,6 +29,10 @@ pub struct GoldenmangaManga {
     cover: String,
     #[serde(rename(serialize = "isNsfw", deserialize = "is_nsfw"))]
     is_nsfw: bool,
+    #[serde(rename(serialize = "firstChapter", deserialize = "first_chapter"))]
+    first_chapter: GoldenmangaChapter,
+    #[serde(rename(serialize = "lastChapter", deserialize = "last_chapter"))]
+    last_chapter: GoldenmangaChapter,
 }
 
 pub struct GoldenmangaScraper {
@@ -147,6 +151,10 @@ impl GoldenmangaScraper {
             });
         }
 
+        let last_chapter = chapters.get(0).unwrap().clone();
+
+        let first_chapter = chapters.get(chapters.len() - 1).unwrap().clone();
+
         Ok(GoldenmangaManga {
             name: title.next().unwrap().text().collect::<String>(),
             description: description.next().unwrap().text().collect::<String>(),
@@ -158,6 +166,8 @@ impl GoldenmangaScraper {
             ),
             chapters,
             is_nsfw: nsfw.next().is_some(),
+            first_chapter,
+            last_chapter,
         })
     }
 
